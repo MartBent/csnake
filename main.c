@@ -8,7 +8,7 @@
 #include "types.h"
 
 //Since the screen is 1024*1024 the width of the rectangles should be 32 pixels. 
-#define RES 64 //Resolution should always be square, and a multiple of 32
+#define RES 128 //Resolution should always be square, and a multiple of 32
 #define SIZE 32 //Game will always be 32 tiles
 #define SQUARE_SIZE RES/SIZE //Adjust the square sizes to the resolution ratio
 #define SQUARE_DIAMETER SQUARE_SIZE/2
@@ -71,12 +71,8 @@ void draw_square(framebuffer_t* buffer, point_t location) {
     if(location.x < SIZE && location.y < SIZE) {
         for(u8 x = 0; x < RES; x++) {
             for(u8 y = 0; y < RES; y++) {
-                //If the pixel is in the rectangle bounds
-                if(location.x == 16) {
-                    usleep(1);
-                }
-                if(is_between(location.x - SQUARE_DIAMETER, location.x + SQUARE_DIAMETER, x) && 
-                   is_between(location.y - SQUARE_DIAMETER, location.y + SQUARE_DIAMETER, y)) {
+                if(is_between(location.x*SQUARE_SIZE - SQUARE_DIAMETER, location.x*SQUARE_SIZE  + SQUARE_DIAMETER, x) && 
+                   is_between(location.y*SQUARE_SIZE - SQUARE_DIAMETER, location.y*SQUARE_SIZE  + SQUARE_DIAMETER, y)) {
                     *buffer[x][y] = 88;
                 }
             }
@@ -96,7 +92,7 @@ bool detect_collision_snake(const snake_t* snake) {
 void move_snake(snake_t* snake) {
     switch(snake->current_direction) {
         case down: {
-            snake->current_location.y = snake->current_location.y == SIZE ? 0 : snake->current_location.y + 1;
+            snake->current_location.y = snake->current_location.y == SIZE ? 1 : snake->current_location.y + 1;
             break;
         }
         case up: {
@@ -104,7 +100,7 @@ void move_snake(snake_t* snake) {
             break;
         }
         case right: {
-            snake->current_location.x = snake->current_location.x == SIZE ? 0 : snake->current_location.x + 1;
+            snake->current_location.x = snake->current_location.x == SIZE ? 1 : snake->current_location.x + 1;
             break;
         }
         case left: {
@@ -112,45 +108,42 @@ void move_snake(snake_t* snake) {
             break;
         }
     }
-   
 
-    for(int i = 0; i < snake->length-1; i++) {
-        snake->point_history[i+1] = snake->point_history[i];
-    }
+
+    memmove(&snake->point_history[1], &snake->point_history[0], (19)*sizeof(point_t));
     snake->point_history[0] = snake->current_location;
-
-
 }
 
 void game_play() {
 
     snake_t snake = {
         .current_direction = right,
-        .current_location = {0,0},
+        .current_location = {1,31},
         .length = 1,
         .point_history = {}
     };
+    snake.point_history[0] = snake.current_location;
 
     point_t current_food = {
-        9,
-        1
+        31,
+        31
     };
 
-    framebuffer_t* frame_buffer = malloc(sizeof(framebuffer_t));
+    framebuffer_t* frame_buffer = malloc(sizeof(framebuffer_t[RES][RES]));
     if(frame_buffer == NULL) {
         printf("Malloc failed!");
     }
+
     while(1) {
 
-        clear_buffer(frame_buffer);
-        
         flush_framebuffer(frame_buffer);
 
-        point_t p = {16,16};
+        clear_buffer(frame_buffer);
+
         for(int i = 0; i < snake.length; i++) {
             draw_square(frame_buffer, snake.point_history[i]);
         }
-        draw_square(frame_buffer, snake.current_location);
+
         draw_square(frame_buffer, current_food);
 
         print_buffer(frame_buffer);
@@ -163,19 +156,18 @@ void game_play() {
 
             //Dead
             printf("Dead\n");
-            usleep(10000);
+            usleep(10000);  
         }
 
         if(point_t_equals(snake.current_location, current_food)) {
-            printf("Eat food\n");
+            snake.length += 1;
+            
             current_food.x = rand() % SIZE;
             current_food.y = rand() % SIZE;
-            snake.length += 1;
         }
-        
 
         //Process any food
-        usleep(500);
+        usleep(100);
     }   
 }
 int main() {
