@@ -1,17 +1,18 @@
 #ifndef SNAKE_C
 #define SNAKE_C
+#include <stdio.h>
 
 #include "snake.h"
 
-void clear_buffer(const snake_driver_t* driver, framebuffer_t* buffer) {
+void clear_buffer(const snake_driver_t* driver, u8* buffer) {
     for(u8 x = 0; x < driver->resolution; x++) {
         for(u8 y = 0; y < driver->resolution; y++) {
-            *buffer[x][y] = 32;
+            *(u8*)(buffer+(driver->resolution*x)+y) = 32;
         }
     }
 }
 
-void draw_square(const snake_driver_t* driver, framebuffer_t* buffer, point_t location) {
+void draw_square(const snake_driver_t* driver, u8* buffer, point_t location) {
     //Location is valid
     const unsigned int square_size = driver->resolution / 32;
     const unsigned int square_diameter = square_size / 2;
@@ -21,7 +22,7 @@ void draw_square(const snake_driver_t* driver, framebuffer_t* buffer, point_t lo
             for(u8 y = 0; y < driver->resolution; y++) {
                 if(is_between(location.x*square_size - square_diameter, location.x*square_size  + square_diameter, x) && 
                    is_between(location.y*square_size - square_diameter, location.y*square_size  + square_diameter, y)) {
-                    *buffer[x][y] = 88;
+                    *(u8*)(buffer+(driver->resolution*x)+y) = 88;
                 }
             }
         }
@@ -61,6 +62,22 @@ void move_snake(const snake_driver_t* driver, snake_t* snake) {
     snake->point_history[0] = snake->current_location;
 }
 
+direction_t filter_direction(direction_t current_direction, direction_t direction) {
+    if(direction == up && current_direction != down) {
+        return up;
+    }
+    if(direction == down && current_direction != up) {
+        return down;
+    }
+    if(direction == left && current_direction != right) {
+        return left;
+    }
+    if(direction == right && current_direction != left) {
+        return right;
+    }
+    return current_direction;
+}
+
 void snake_play(const snake_driver_t* driver) {
     
     snake_t snake = {
@@ -76,23 +93,20 @@ void snake_play(const snake_driver_t* driver) {
         driver->random_number_cb()
     };
 
-    framebuffer_t* frame_buffer = malloc(sizeof(framebuffer_t[driver->snake_length][driver->snake_length]));
-    if(frame_buffer == (void*)0) {
-       return;
-    }
+    u8* frame_buffer = malloc(sizeof(u8)*driver->resolution*driver->resolution);
 
     while(1) {
 
-        snake.current_direction = driver->read_direction_cb();
-
+        snake.current_direction = filter_direction(snake.current_direction, driver->read_direction_cb());
+        
         clear_buffer(driver, frame_buffer);
-
+        printf("Clear\n");
         for(int i = 0; i < snake.length; i++) {
             draw_square(driver, frame_buffer, snake.point_history[i]);
         }
         draw_square(driver, frame_buffer, current_food);
 
-        driver->display_flush_cb(frame_buffer, driver->resolution);
+        driver->display_flush_cb((const u8*)frame_buffer, driver->resolution);
 
         //Move snake
         move_snake(driver, &snake);

@@ -18,7 +18,7 @@ void delay(unsigned long msec)
     } while (res && errno == EINTR);
 }
 
-void display_flush(const framebuffer_t* grid, const unsigned long resolution) {
+void display_flush(const u8* grid, const unsigned long resolution) {
     
     for (u8 i = 0; i < resolution; i++) {
         printf("-");
@@ -27,7 +27,7 @@ void display_flush(const framebuffer_t* grid, const unsigned long resolution) {
     for (u8 i = 0; i < resolution; i++) {
         printf("|");
         for (u8 j = 0; j < resolution; j++) {
-            printf("%c", *grid[j][i]);
+            printf("%c", *(u8*)(grid+(resolution*i)+j));
         }
         printf("|");
         printf("\n");
@@ -39,8 +39,6 @@ void display_flush(const framebuffer_t* grid, const unsigned long resolution) {
 }
 u8 rnd() {
     u8 res = rand() % 32;
-
-    printf("%d", res);
     return res;
 }
 direction_t read_direction() {
