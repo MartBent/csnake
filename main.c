@@ -18,7 +18,7 @@ void delay(unsigned long msec)
     } while (res && errno == EINTR);
 }
 
-void display_flush(const u8* grid, const unsigned long resolution) {
+void display_frame(const u8* grid, const unsigned long resolution) {
     
     for (u8 i = 0; i < resolution; i++) {
         printf("-");
@@ -37,6 +37,10 @@ void display_flush(const u8* grid, const unsigned long resolution) {
     }
     printf("\n");
 }
+void display_score(u8 score) {
+    
+}
+
 u8 rnd() {
     u8 res = rand() % 32;
     return res;
@@ -50,10 +54,12 @@ int main() {
     srand(time(NULL));
     snake_driver_t driver;
     driver.delay_function_cb = delay;
-    driver.display_flush_cb = display_flush;
+    driver.display_frame_cb = display_frame;
+    driver.display_score_cb = display_score;
     driver.random_number_cb = rnd;
     driver.read_direction_cb = read_direction;
-    driver.resolution = 128;
+    driver.resolution = 32;
     driver.snake_length = 33;
+    driver.frame_buffer = malloc(driver.resolution*driver.resolution);
     snake_play(&driver);
 }   

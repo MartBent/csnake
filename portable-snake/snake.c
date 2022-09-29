@@ -4,15 +4,15 @@
 
 #include "snake.h"
 
-void clear_buffer(const snake_driver_t* driver, u8* buffer) {
+void clear_buffer(const snake_driver_t* driver) {
     for(u8 x = 0; x < driver->resolution; x++) {
         for(u8 y = 0; y < driver->resolution; y++) {
-            *(u8*)(buffer+(driver->resolution*x)+y) = 32;
+            *(u8*)(driver->frame_buffer+(driver->resolution*x)+y) = 32;
         }
     }
 }
 
-void draw_square(const snake_driver_t* driver, u8* buffer, point_t location) {
+void draw_square(const snake_driver_t* driver, point_t location) {
     //Location is valid
     const unsigned int square_size = driver->resolution / 32;
     const unsigned int square_diameter = square_size / 2;
@@ -22,7 +22,7 @@ void draw_square(const snake_driver_t* driver, u8* buffer, point_t location) {
             for(u8 y = 0; y < driver->resolution; y++) {
                 if(is_between(location.x*square_size - square_diameter, location.x*square_size  + square_diameter, x) && 
                    is_between(location.y*square_size - square_diameter, location.y*square_size  + square_diameter, y)) {
-                    *(u8*)(buffer+(driver->resolution*x)+y) = 88;
+                    *(u8*)(driver->frame_buffer+(driver->resolution*x)+y) = 88;
                 }
             }
         }
@@ -93,20 +93,22 @@ void snake_play(const snake_driver_t* driver) {
         driver->random_number_cb()
     };
 
-    u8* frame_buffer = malloc(sizeof(u8)*driver->resolution*driver->resolution);
-
     while(1) {
 
-        snake.current_direction = filter_direction(snake.current_direction, driver->read_direction_cb());
+        direction_t direction = driver->read_direction_cb();
+        if(filter_direction(snake.current_direction, direction)) {
+        	snake.current_direction = direction;
+        }
         
-        clear_buffer(driver, frame_buffer);
+        clear_buffer(driver);
         printf("Clear\n");
         for(int i = 0; i < snake.length; i++) {
-            draw_square(driver, frame_buffer, snake.point_history[i]);
+            draw_square(driver, snake.point_history[i]);
         }
-        draw_square(driver, frame_buffer, current_food);
+        draw_square(driver, current_food);
 
-        driver->display_flush_cb((const u8*)frame_buffer, driver->resolution);
+        driver->display_frame_cb((const u8*)driver->frame_buffer, driver->resolution);
+        driver->display_score_cb(snake.length);
 
         //Move snake
         move_snake(driver, &snake);

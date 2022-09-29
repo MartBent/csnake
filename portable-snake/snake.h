@@ -12,21 +12,24 @@
 #include "types.h"
 
 typedef void (*delayFunction)() ; 
-typedef void (*displayFlushFunction)(const u8* buffer, unsigned long resolution);
+typedef void (*displayFrameFunction)(const u8* buffer, unsigned long resolution);
+typedef void (*displayScoreFunction)(const u8 score);
 typedef direction_t (*readDirectionFunction)();
 typedef u8 (*randomNumberFunction)();
 
 typedef struct {
     unsigned int resolution;
+    u8* frame_buffer;
     u8 snake_length;
     delayFunction delay_function_cb;
-    displayFlushFunction display_flush_cb;
+    displayFrameFunction display_frame_cb;
+    displayScoreFunction display_score_cb;
     readDirectionFunction read_direction_cb;
     randomNumberFunction random_number_cb;
 } snake_driver_t;
 
-void clear_buffer(const snake_driver_t* driver, u8* buffer);
-void draw_square(const snake_driver_t* driver, u8* buffer, point_t location);
+void clear_buffer(const snake_driver_t* driver);
+void draw_square(const snake_driver_t* driver, point_t location);
 
 bool detect_collision_snake(const snake_t* snake);
 void move_snake(const snake_driver_t* driver, snake_t* snake);
