@@ -126,18 +126,9 @@ direction_t filter_direction(direction_t current_direction, direction_t directio
 
 char* snake_play(const snake_driver_t* driver) {
 
-	if(driver->resolution == NULL) {
-		return "Resolution not defined!";
-	}
-	if(driver->snake_length == NULL) {
-		return "Snake length not defined!";
-	}
 	if(driver->frame_buffer == NULL) {
 		return "Frame buffer is NULL, possibly a memory issue?";
 	}
-    if(driver->background_color == NULL || driver->snake_color == NULL || driver->food_color == NULL) {
-		return "Not all colors are defined!";
-	} 
 	if(driver->display_frame_cb == NULL || driver->delay_function_cb == NULL || driver->display_score_cb == NULL || driver->random_number_cb == NULL || driver->read_direction_cb == NULL) {
 		return "Not all callbacks are defined!";
 	}
