@@ -93,4 +93,4 @@ int main(void) {
 ```
 ### Output
 
-![gif](https://i.imgur.com/WBrGcmK.gif)
+![Snake](https://i.imgur.com/IClmkOl.gif)
