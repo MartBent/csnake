@@ -3,7 +3,7 @@ A driver that processes a snake game and gives the user the ability to flush the
 
 ## WIP
   - Still uses parts of Standard library.
-  - Not all possible errors are handled properly.
-  - Square drawing algorithm can be improved speed-wise. 
+  - ~~Not all possible errors are handled properly.~~
+  - ~~Square drawing algorithm can be improved speed-wise.~~
   - No sound support (yet).
-  - No custom color support (yet).
+  - ~~No custom color support (yet).~~
