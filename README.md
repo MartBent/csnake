@@ -17,20 +17,20 @@ A FPGA system connected to a VGA screen using a pixel buffer at location FRAME_B
 volatile int edge_capture;
 static direction_t direction = down;
 
-void delay(unsigned long msec)
-{
+void delay(unsigned long msec) {
     usleep(msec*300);
 }
 
 void display_flush(const u8* grid, const unsigned long resolution) {
-	//Not needed since the frame buffer pointer is passed
+    //Not needed since the frame buffer pointer is passed
 }
+
 u8 rnd() {
     return (rand() % 30) + 1;
 }
 
 void display_score(u8 score) {
-	IOWR_ALTERA_AVALON_PIO_DATA(SCORE_PIO_BASE, score);
+    IOWR_ALTERA_AVALON_PIO_DATA(SCORE_PIO_BASE, score);
 }
 
 direction_t read_direction() {
@@ -38,26 +38,27 @@ direction_t read_direction() {
 }
 
 static void interrupt(void* c) {
-	volatile int* edge_capture_ptr = (volatile int*)c;
-	*edge_capture_ptr = IORD_ALTERA_AVALON_PIO_EDGE_CAP(BTN_PIO_BASE);
-	IOWR_ALTERA_AVALON_PIO_EDGE_CAP(BTN_PIO_BASE, 0);
+    volatile int* edge_capture_ptr = (volatile int*)c;
+    *edge_capture_ptr = IORD_ALTERA_AVALON_PIO_EDGE_CAP(BTN_PIO_BASE);
+    IOWR_ALTERA_AVALON_PIO_EDGE_CAP(BTN_PIO_BASE, 0);
 
-	//Direction are calculated differently because the frame is rotated
-	switch(edge_capture) {
-		case 8:
-			direction = up;
-			break;
-		case 4:
-			direction = right;
-			break;
-		case 2:
-			direction = left;
-			break;
-		case 1:
-			direction = down;
-			break;
+    //Determine direction according to which key is pressed
+    switch(edge_capture) {
+        case 8:
+	    direction = up;
+	    break;
+	case 4:
+	    direction = right;
+	    break;
+	case 2:
+	    direction = left;
+	    break;
+	case 1:
+	    direction = down;
+	    break;
 	}
-	//No debounce required in this particular application
+	
+    //No debounce required in this application
 }
 
 int main(void) {
@@ -68,29 +69,33 @@ int main(void) {
 	void* edge_capture_ptr = (void*) &edge_capture;
 	alt_ic_isr_register(BTN_PIO_IRQ_INTERRUPT_CONTROLLER_ID, BTN_PIO_IRQ, interrupt, edge_capture_ptr, NULL);
 
-	//Generate random number
+	//Seed RNG
 	srand(1235);
 
 	//Play snake
 	while(1) {
-		snake_driver_t driver;
-		driver.delay_function_cb = delay;
-		driver.display_frame_cb = display_flush;
-		driver.display_score_cb = display_score;
-		driver.random_number_cb = rnd;
-		driver.read_direction_cb = read_direction;
-		driver.resolution = 512;
-		driver.snake_length = 32;
-		driver.snake_color = 0xFF; //White
-		driver.background_color = 0x00; //Black
-		driver.food_color = 0x5A; //Gray
-		driver.frame_buffer = (u8*)FRAME_BUFFER_BASE;
-		printf("Starting snake...\n");
-		char* msg = snake_play(&driver);
-		printf(msg);
+	    snake_driver_t driver;
+	    
+	    driver.delay_function_cb = delay;
+	    driver.display_frame_cb = display_flush;
+	    driver.display_score_cb = display_score;
+	    driver.random_number_cb = rnd;
+	    driver.read_direction_cb = read_direction;
+	    driver.resolution = 512;
+	    driver.snake_length = 32;
+	    driver.snake_color = 0xFF; //White
+	    driver.background_color = 0x00; //Black
+	    driver.food_color = 0x5A; //Gray
+	    driver.frame_buffer = (u8*)FRAME_BUFFER_BASE;
+	    
+	    printf("Starting snake...\n");
+	    char* msg = snake_play(&driver);
+	    printf(msg);
 	}
 }
 ```
 ### Output
+
+Playing snake on the VGA monitor
 
 ![Snake](https://i.imgur.com/IClmkOl.gif)
