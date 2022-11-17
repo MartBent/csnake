@@ -96,6 +96,6 @@ int main(void) {
 ```
 ### Output
 
-Playing snake on the VGA monitor
+Playing snake on a VGA monitor
 
 ![Snake](https://i.imgur.com/IClmkOl.gif)
