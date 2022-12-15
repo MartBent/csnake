@@ -8,7 +8,7 @@ A driver that processes a snake game and gives the user the ability to flush the
   - No sound support (yet).
   - ~~No custom color support (yet).~~
 ## Example usage
-A FPGA system connected to a VGA screen using a pixel buffer at location FRAME_BUFFER_BASE
+A FPGA system connected to a VGA screen using a pixel buffer at location FRAME_BUFFER_BASE. Full repository: [FPGA Nios snake](https://github.com/MartBent/fpga-nios-snake)
 
 ### Code
 ```C

@@ -1,57 +1,28 @@
-#include <time.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <stdio.h>
-
 #include "portable-snake/snake.h"
 
-void delay(unsigned long msec)
-{
-    struct timespec ts;
-    int res;
-
-    ts.tv_sec = msec / 1000;
-    ts.tv_nsec = (msec % 1000) * 1000000;
-
-    do {
-        res = nanosleep(&ts, &ts);
-    } while (res && errno == EINTR);
+void delay(unsigned long msec) {
+    //This function should block for the given amount of milliseconds.
 }
 
 void display_frame(const u8* grid, const unsigned long resolution) {
-    
-    for (u8 i = 0; i < resolution; i++) {
-        printf("-");
-    }
-    printf("\n");
-    for (u8 i = 0; i < resolution; i++) {
-        printf("|");
-        for (u8 j = 0; j < resolution; j++) {
-            printf("%c", *(u8*)(grid+(resolution*i)+j));
-        }
-        printf("|");
-        printf("\n");
-    }
-    for (u8 i = 0; i < resolution; i++) {
-        printf("-");
-    }
-    printf("\n");
+    //Parameter grid will hold a pointer to a resolution*resolution sized grid. This grid holds the current state of the snake game.
 }
+
 void display_score(u8 score) {
-    
+   //Parameter score will hold the current length of the snake. 
 }
 
 u8 rnd() {
-    u8 res = rand() % 32;
-    return res;
+    //Generate a random number between 0 and 32.
 }
+
 direction_t read_direction() {
+    //This function should return the direction of the snake, depending on a user implemented input.
     return down;
 }
 
 
 int main() {
-    srand(time(NULL));
     snake_driver_t driver;
     driver.delay_function_cb = delay;
     driver.display_frame_cb = display_frame;
